@@ -17,7 +17,7 @@ namespace AkkaNet_DomainBridging_Test
         {
             ActorSystem = ActorSystem.Create("DomainBridge");
 
-            var _consoleWriter = ActorSystem.ActorOf(Props.Create(() => new ConsoleWriter()));
+            var _consoleWriter = ActorSystem.ActorOf(Props.Create(() => new ConsoleWriter()), "consoleWriter");
 
             var _myActor = ActorSystem.ActorOf(Props.Create(() => new TranslatorActor(_consoleWriter)));
             PlayLegacyMessages1(actor: _myActor);
