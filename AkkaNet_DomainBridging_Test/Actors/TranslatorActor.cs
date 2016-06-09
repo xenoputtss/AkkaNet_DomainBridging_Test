@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.CodeDom;
 using Akka.Actor;
-using Akka.Pattern;
 
 namespace AkkaNet_DomainBridging_Test.Actors
 {
@@ -14,9 +10,11 @@ namespace AkkaNet_DomainBridging_Test.Actors
 
         private string UserName = null;
         private string Pin = null;
+        private IActorRef _consoleWriter;
 
-        public TranslatorActor()
+        public TranslatorActor(IActorRef consoleWriter)
         {
+            _consoleWriter = consoleWriter;
             Become(WaitingForMiniumumData);
         }
 
@@ -25,33 +23,41 @@ namespace AkkaNet_DomainBridging_Test.Actors
             Receive<LegacyDomain.Events.UserNameAdded>(e =>
             {
                 UserName = e.UserName;
-                if (WeAreValid)
-                {
-                    Console.WriteLine($@" Create User with {UserName} and {Pin}");
-                    Become(Phase2);
-                    //Stash.UnstashAll();
-                }
+                IsNowValidCheck();
             });
             Receive<LegacyDomain.Events.PinAdded>(e =>
             {
                 Pin = e.Pin;
-                if (WeAreValid)
-                {
-                    Console.WriteLine($@" Create User with {UserName} and {Pin}");
-                    Become(Phase2);
-                    //Stash.UnstashAll();
-                }
+                IsNowValidCheck();
             });
+            ReceiveAny(_ => Stash.Stash());
+        }
 
-            //ReceiveAny(_ => Stash.Stash());
+        private void IsNowValidCheck()
+        {
+            if (WeAreValid)
+            {
+                var create = new ConsumerDomain.Commands.CreateConsumer(userName: UserName, pin: Pin);
+                _consoleWriter.Tell(create);
+                Become(Phase2);
+                Stash.UnstashAll();
+            }
         }
 
         private void Phase2()
         {
-            Receive<LegacyDomain.Events.UserNameAdded>(e => Console.Write(e.UserName));
-            Receive<LegacyDomain.Events.PinAdded>(e => Console.WriteLine(e.Pin));
-            Receive<LegacyDomain.Events.FirstNameAdded>(e => Console.WriteLine(e.FirstName));
-            Receive<LegacyDomain.Events.LastNameAdded>(e=>Console.WriteLine(e.LastName));
+            //Receive<LegacyDomain.Events.UserNameAdded>(e => _consoleWriter.Tell(e.UserName));
+            //Receive<LegacyDomain.Events.PinAdded>(e => _consoleWriter.Tell(e.Pin));
+            Receive<LegacyDomain.Events.FirstNameAdded>(e =>
+            {
+                var m = new ConsumerDomain.Commands.AddFirstName(e.FirstName);
+                _consoleWriter.Tell(m);
+            });
+            Receive<LegacyDomain.Events.LastNameAdded>(e =>
+            {
+                var m = new ConsumerDomain.Commands.AddLastName(e.LastName);
+                _consoleWriter.Tell(m);
+            });
         }
         private bool WeAreValid => UserName != null && Pin != null;
     }

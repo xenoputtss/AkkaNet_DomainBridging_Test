@@ -53,8 +53,13 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="Tababular, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Tababular.1.0.5\lib\NET45\Tababular.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Actors\ConsoleWriter.cs" />
     <Compile Include="Actors\TranslatorActor.cs" />
     <Compile Include="ConsumerDomain\Commands\Commands.cs" />
     <Compile Include="ConsumerDomain\Events\Events.cs" />
