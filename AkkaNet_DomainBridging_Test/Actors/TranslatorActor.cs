@@ -10,11 +10,11 @@ namespace AkkaNet_DomainBridging_Test.Actors
 
         private string UserName = null;
         private string Pin = null;
-        private IActorRef _consoleWriter;
+        private readonly IActorRef _bo;
 
-        public TranslatorActor(IActorRef consoleWriter)
+        public TranslatorActor(IActorRef bo)
         {
-            _consoleWriter = consoleWriter;
+            _bo = bo;
             Become(WaitingForMiniumumData);
         }
 
@@ -38,7 +38,7 @@ namespace AkkaNet_DomainBridging_Test.Actors
             if (WeAreValid)
             {
                 var create = new ConsumerDomain.Commands.CreateConsumer(userName: UserName, pin: Pin);
-                _consoleWriter.Tell(create);
+                _bo.Tell(create);
                 Become(Phase2);
                 Stash.UnstashAll();
             }
@@ -51,13 +51,15 @@ namespace AkkaNet_DomainBridging_Test.Actors
             Receive<LegacyDomain.Events.FirstNameAdded>(e =>
             {
                 var m = new ConsumerDomain.Commands.AddFirstName(e.FirstName);
-                _consoleWriter.Tell(m);
+                _bo.Tell(m);
             });
             Receive<LegacyDomain.Events.LastNameAdded>(e =>
             {
                 var m = new ConsumerDomain.Commands.AddLastName(e.LastName);
-                _consoleWriter.Tell(m);
+                _bo.Tell(m);
             });
+
+
         }
         private bool WeAreValid => UserName != null && Pin != null;
     }

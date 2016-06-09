@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actors\ConsoleWriter.cs" />
+    <Compile Include="Actors\ConsumerActor.cs" />
     <Compile Include="Actors\TranslatorActor.cs" />
     <Compile Include="ConsumerDomain\Commands\Commands.cs" />
     <Compile Include="ConsumerDomain\Events\Events.cs" />

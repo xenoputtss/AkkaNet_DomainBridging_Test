@@ -17,12 +17,13 @@ namespace AkkaNet_DomainBridging_Test
         {
             ActorSystem = ActorSystem.Create("DomainBridge");
 
-            var _consoleWriter = ActorSystem.ActorOf(Props.Create(() => new ConsoleWriter()), "consoleWriter");
+            var cw = ActorSystem.ActorOf(Props.Create(() => new ConsoleWriter()));
+            var c = ActorSystem.ActorOf(Props.Create(() => new ConsumerActor(cw)));
 
-            var _myActor = ActorSystem.ActorOf(Props.Create(() => new TranslatorActor(_consoleWriter)));
+            var _myActor = ActorSystem.ActorOf(Props.Create(() => new TranslatorActor(c)));
             PlayLegacyMessages1(actor: _myActor);
 
-            _myActor = ActorSystem.ActorOf(Props.Create(() => new TranslatorActor(_consoleWriter)));
+            _myActor = ActorSystem.ActorOf(Props.Create(() => new TranslatorActor(c)));
             PlayLegacyMessages2(actor: _myActor);
 
             //_myActor = ActorSystem.ActorOf<TranslatorActor>("Actor1");
