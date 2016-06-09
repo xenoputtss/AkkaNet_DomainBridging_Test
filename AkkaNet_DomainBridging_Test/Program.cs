@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Actor.Internal;
+using AkkaNet_DomainBridging_Test.Actors;
 
 namespace AkkaNet_DomainBridging_Test
 {
@@ -15,16 +16,29 @@ namespace AkkaNet_DomainBridging_Test
         static void Main(string[] args)
         {
             ActorSystem = ActorSystem.Create("DomainBridge");
+
+            var _myActor = ActorSystem.ActorOf<TranslatorActor>("Actor1");
+
+            PlayLegacyMessages1(actor: _myActor);
+
+            Console.ReadKey();
         }
 
 
 
-        public static void PlayLegacyMessages1()
+        public static void PlayLegacyMessages1(IActorRef actor)
         {
             //UserName1
             //Pin1
             //FirstName1
             //LastName1
+            var userName = new LegacyDomain.Events.UserNameAdded("rforster");
+            var pin = new LegacyDomain.Events.PinAdded("1234");
+            var firstName = new LegacyDomain.Events.FirstNameAdded("Ryan");
+            var lastName = new LegacyDomain.Events.LastNameAdded("Forster");
+
+            actor.Tell(userName);
+            actor.Tell(pin);
 
             //Result, 3 messages
             // 1 Created
