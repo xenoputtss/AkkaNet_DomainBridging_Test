@@ -39,6 +39,9 @@ namespace AkkaNet_DomainBridging_Test
 
             actor.Tell(userName);
             actor.Tell(pin);
+            actor.Tell(firstName);
+            actor.Tell(lastName);
+
 
             //Result, 3 messages
             // 1 Created
