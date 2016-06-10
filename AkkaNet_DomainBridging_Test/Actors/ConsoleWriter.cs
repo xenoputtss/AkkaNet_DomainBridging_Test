@@ -11,8 +11,19 @@ namespace AkkaNet_DomainBridging_Test.Actors
         {
             ReceiveAny(msg =>
             {
-                Console.WriteLine(msg.GetType().Name);
-                Console.WriteLine(_tf.FormatObjects(new[] { msg }));
+                //if (msg)
+                var serializedObject = _tf.FormatObjects(new[] { msg });
+
+                var isError = serializedObject.Contains("broken");
+                var output = isError ? Console.Error : Console.Out;
+
+                output.WriteLine(msg.GetType().Name);
+                output.WriteLine(serializedObject);
+
+                if (isError)
+                {
+                    throw new Exception("Everything's ruined!");
+                }
             });
         }
     }

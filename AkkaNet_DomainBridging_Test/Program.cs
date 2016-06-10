@@ -38,7 +38,10 @@ namespace AkkaNet_DomainBridging_Test
 
             //PlayLegacyMessages3(actor: distro);
 
-            PlayLegacyMessages4(actor: distro);
+            //PlayLegacyMessages4(actor: distro);
+
+            PlayLegacyMessages5(actor: distro);
+
 
             //_myActor = ActorSystem.ActorOf<TranslatorActor>("Actor1");
             //PlayLegacyMessages1a(actor: distro);
@@ -174,6 +177,64 @@ namespace AkkaNet_DomainBridging_Test
             //*/
         }
 
+        public static void PlayLegacyMessages5(IActorRef actor)
+        {
+            var userName1 = new LegacyDomain.Events.UserNameAdded("User1", "TestUser1");
+            var pin1 = new LegacyDomain.Events.PinAdded("abcd1", "TestUser1");
+            var firstName1 = new LegacyDomain.Events.FirstNameAdded("user1", "TestUser1");
+            var lastName1 = new LegacyDomain.Events.LastNameAdded("one", "TestUser1");
+
+            var userName2 = new LegacyDomain.Events.UserNameAdded("User2", "TestUser2");
+            var pin2 = new LegacyDomain.Events.PinAdded("broken pin", "TestUser2");
+            var firstName2 = new LegacyDomain.Events.FirstNameAdded("user2", "TestUser2");
+            var lastName2 = new LegacyDomain.Events.LastNameAdded("two", "TestUser2");
+
+            var userName3 = new LegacyDomain.Events.UserNameAdded("User3", "TestUser3");
+            var pin3 = new LegacyDomain.Events.PinAdded("abcd3", "TestUser3");
+            var firstName3 = new LegacyDomain.Events.FirstNameAdded("user3", "TestUser3");
+            var lastName3 = new LegacyDomain.Events.LastNameAdded("three", "TestUser3");
+
+
+            //actor.Tell(pin2);
+            //actor.Tell(pin1);
+            //actor.Tell(userName2);
+            //actor.Tell(userName1);
+
+            ///*
+            //Pin1
+            //LastName1
+            //FirstName1
+            actor.Tell(pin1);
+            actor.Tell(lastName1);
+            actor.Tell(firstName1);
+
+            //UserName2
+            //Pin2
+            //FirstName2
+            //LastName2
+            actor.Tell(userName2);
+            actor.Tell(pin2);
+            actor.Tell(firstName2);
+            actor.Tell(lastName2);
+
+            //UserName3
+            //Pin3
+            //FirstName3
+            //LastName3
+            actor.Tell(userName3);
+            actor.Tell(pin3);
+            actor.Tell(firstName3);
+            actor.Tell(lastName3);
+
+            //UserName1
+            actor.Tell(userName1);
+
+            //Result
+            // Created user 2 (3 messages)
+            // Created user 3 (3 messages)
+            // Created user 1 (3 messages)
+            //*/
+        }
     }
 
 }
