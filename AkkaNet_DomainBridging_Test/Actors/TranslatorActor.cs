@@ -13,9 +13,12 @@ namespace AkkaNet_DomainBridging_Test.Actors
 
         private readonly IActorRef _destinationWriter;
 
-        public TranslatorActor(IActorRef destinationWriter)
+        public TranslatorActor()
         {
-            _destinationWriter = destinationWriter;
+            //var consoleWriter = Context.ActorOf(Props.Create(() => new ConsoleWriter()));
+            var consoleWriter = Context.ActorSelection("/user/consoleWriter");
+            _destinationWriter = Context.ActorOf(Props.Create(() => new ConsumerActor(consoleWriter)));
+
             Become(WaitingForMiniumumData);
         }
 
@@ -23,14 +26,14 @@ namespace AkkaNet_DomainBridging_Test.Actors
         {
             Receive<LegacyDomain.Events.UserNameAdded>(e =>
             {
-                Console.WriteLine(e.AggregateId + " " + e.UserName);
+                //Console.WriteLine(e.AggregateId + " " + e.UserName);
                 CheckForAggregateConsistency(e);
                 UserName = e.UserName;
                 IsNowValidCheck();
             });
             Receive<LegacyDomain.Events.PinAdded>(e =>
             {
-                Console.WriteLine(e.AggregateId +" "+ e.Pin);
+                //Console.WriteLine(e.AggregateId +" "+ e.Pin);
                 CheckForAggregateConsistency(e);
                 Pin = e.Pin;
                 IsNowValidCheck();

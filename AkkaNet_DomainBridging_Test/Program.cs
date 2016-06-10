@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using Akka.Actor;
 using Akka.Routing;
 using AkkaNet_DomainBridging_Test.Actors;
@@ -9,34 +11,37 @@ namespace AkkaNet_DomainBridging_Test
     {
         public static ActorSystem ActorSystem;
 
+
         static void Main(string[] args)
         {
             ActorSystem = ActorSystem.Create("DomainBridge");
 
-            var cw = ActorSystem.ActorOf(Props.Create(() => new ConsoleWriter()));
-            var c = ActorSystem.ActorOf(Props.Create(() => new ConsumerActor(cw)));
+            var cw = ActorSystem.ActorOf(Props.Create(() => new ConsoleWriter()),"consoleWriter");
+            //var c = ActorSystem.ActorOf(Props.Create(() => new ConsumerActor(cw)));
 
-            var router = ActorSystem.ActorOf(Props.Create(() => new TranslatorActor(c)).WithRouter(
-                new ConsistentHashingPool(2).WithHashMapping(o =>
-                {
-                    if (o is IAmAnAggregateMessage)
-                    {
-                        Console.WriteLine(((IAmAnAggregateMessage)o).AggregateId);
-                        return ((IAmAnAggregateMessage)o).AggregateId;
-                    }
-                    throw new Exception("Hashing Failure");
-                })), "MasterTranslatorRouter");
+            var distro = ActorSystem.ActorOf(Props.Create(() => new DistributionActor()));
+            //var router = ActorSystem.ActorOf(Props.Create(() => new TranslatorActor(c)).WithRouter(
+            //    new ConsistentHashingPool(2).WithHashMapping(o =>
+            //    {
+            //        if (o is IAmAnAggregateMessage)
+            //        {
+            //            Console.WriteLine(((IAmAnAggregateMessage)o).AggregateId);
+            //            return ((IAmAnAggregateMessage)o).AggregateId;
+            //        }
+            //        throw new Exception("Hashing Failure");
+            //    })), "MasterTranslatorRouter");
 
-            //PlayLegacyMessages1(actor: router);
 
-            //PlayLegacyMessages2(actor: router);
+            //PlayLegacyMessages1(actor: distro);
 
-            //PlayLegacyMessages3(actor: router);
+            //PlayLegacyMessages2(actor: distro);
 
-            PlayLegacyMessages4(actor: router);
+            //PlayLegacyMessages3(actor: distro);
+
+            PlayLegacyMessages4(actor: distro);
 
             //_myActor = ActorSystem.ActorOf<TranslatorActor>("Actor1");
-            //PlayLegacyMessages1a(actor: _myActor);
+            //PlayLegacyMessages1a(actor: distro);
             Console.ReadKey();
         }
 
@@ -128,12 +133,12 @@ namespace AkkaNet_DomainBridging_Test
             var lastName3 = new LegacyDomain.Events.LastNameAdded("three", "TestUser3");
 
 
-            actor.Tell(pin2);
-            actor.Tell(pin1);
-            actor.Tell(userName2);
-            actor.Tell(userName1);
+            //actor.Tell(pin2);
+            //actor.Tell(pin1);
+            //actor.Tell(userName2);
+            //actor.Tell(userName1);
 
-            /*
+            ///*
             //Pin1
             //LastName1
             //FirstName1

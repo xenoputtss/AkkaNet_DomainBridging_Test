@@ -4,8 +4,8 @@ namespace AkkaNet_DomainBridging_Test.Actors
 {
     public class ConsumerActor : ReceiveActor
     {
-        private readonly IActorRef _consoleWriter;
-        public ConsumerActor(IActorRef consoleWriter)
+        private readonly ActorSelection _consoleWriter;
+        public ConsumerActor(ActorSelection consoleWriter)
         {
             _consoleWriter = consoleWriter;
             Receive<ConsumerDomain.Commands.CreateConsumer>(m =>
