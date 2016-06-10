@@ -11,7 +11,7 @@ namespace AkkaNet_DomainBridging_Test.Actors
         {
             ReceiveAny(msg =>
             {
-                //if (msg)
+                System.Threading.Thread.Sleep(250);
                 var serializedObject = _tf.FormatObjects(new[] { msg });
 
                 var isError = serializedObject.Contains("broken");
