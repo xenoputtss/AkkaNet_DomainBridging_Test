@@ -12,6 +12,7 @@ namespace AkkaNet_DomainBridging_Test.Actors
             ReceiveAny(msg =>
             {
                 Console.WriteLine(msg.GetType().Name);
+                System.Threading.Thread.Sleep(250);
                 Console.WriteLine(_tf.FormatObjects(new[] { msg }));
             });
         }
