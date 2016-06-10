@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom;
 using Akka.Actor;
 
 namespace AkkaNet_DomainBridging_Test.Actors
@@ -8,13 +7,15 @@ namespace AkkaNet_DomainBridging_Test.Actors
     {
         public IStash Stash { get; set; }
 
+        private string AggregateId = null;
         private string UserName = null;
         private string Pin = null;
-        private readonly IActorRef _bo;
 
-        public TranslatorActor(IActorRef bo)
+        private readonly IActorRef _destinationWriter;
+
+        public TranslatorActor(IActorRef destinationWriter)
         {
-            _bo = bo;
+            _destinationWriter = destinationWriter;
             Become(WaitingForMiniumumData);
         }
 
@@ -22,23 +23,35 @@ namespace AkkaNet_DomainBridging_Test.Actors
         {
             Receive<LegacyDomain.Events.UserNameAdded>(e =>
             {
+                Console.WriteLine(e.AggregateId + " " + e.UserName);
+                CheckForAggregateConsistency(e);
                 UserName = e.UserName;
                 IsNowValidCheck();
             });
             Receive<LegacyDomain.Events.PinAdded>(e =>
             {
+                Console.WriteLine(e.AggregateId +" "+ e.Pin);
+                CheckForAggregateConsistency(e);
                 Pin = e.Pin;
                 IsNowValidCheck();
             });
             ReceiveAny(_ => Stash.Stash());
         }
 
+        private void CheckForAggregateConsistency(IAmAnAggregateMessage m)
+        {
+            if (AggregateId == null)
+                AggregateId = m.AggregateId;
+            if (AggregateId != m.AggregateId)
+                throw new Exception($@"Aggregate Mismatched in {nameof(TranslatorActor)} with CurrentId='{AggregateId}' and Message AggregateId='{m.AggregateId}'");
+        }
+
         private void IsNowValidCheck()
         {
             if (WeAreValid)
             {
-                var create = new ConsumerDomain.Commands.CreateConsumer(userName: UserName, pin: Pin);
-                _bo.Tell(create);
+                var create = new ConsumerDomain.Commands.CreateConsumer(userName: UserName, pin: Pin, aggregateId: AggregateId);
+                _destinationWriter.Tell(create);
                 Become(Phase2);
                 Stash.UnstashAll();
             }
@@ -46,17 +59,17 @@ namespace AkkaNet_DomainBridging_Test.Actors
 
         private void Phase2()
         {
-            //Receive<LegacyDomain.Events.UserNameAdded>(e => _consoleWriter.Tell(e.UserName));
-            //Receive<LegacyDomain.Events.PinAdded>(e => _consoleWriter.Tell(e.Pin));
             Receive<LegacyDomain.Events.FirstNameAdded>(e =>
             {
-                var m = new ConsumerDomain.Commands.AddFirstName(e.FirstName);
-                _bo.Tell(m);
+                CheckForAggregateConsistency(e);
+                var m = new ConsumerDomain.Commands.AddFirstName(e.FirstName, aggregateId: AggregateId);
+                _destinationWriter.Tell(m);
             });
             Receive<LegacyDomain.Events.LastNameAdded>(e =>
             {
-                var m = new ConsumerDomain.Commands.AddLastName(e.LastName);
-                _bo.Tell(m);
+                CheckForAggregateConsistency(e);
+                var m = new ConsumerDomain.Commands.AddLastName(e.LastName, aggregateId: AggregateId);
+                _destinationWriter.Tell(m);
             });
 
 
