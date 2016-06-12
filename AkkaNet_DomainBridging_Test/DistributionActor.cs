@@ -17,7 +17,7 @@ namespace AkkaNet_DomainBridging_Test
                 {
                     var im = (IAmAnAggregateMessage)m;
                     if(!_actorRefs.ContainsKey(im.AggregateId))
-                        _actorRefs.Add(im.AggregateId,Context.ActorOf(Props.Create(()=>new TranslatorActor())));
+                        _actorRefs.Add(im.AggregateId,Context.ActorOf(Props.Create(()=>new TranslatorActor(im.AggregateId))));
 
                     var actor = _actorRefs[im.AggregateId];
                     actor.Tell(m);

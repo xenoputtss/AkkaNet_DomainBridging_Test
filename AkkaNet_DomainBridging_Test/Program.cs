@@ -32,7 +32,7 @@ namespace AkkaNet_DomainBridging_Test
             //    })), "MasterTranslatorRouter");
 
 
-            //PlayLegacyMessages1(actor: distro);
+            PlayLegacyMessages1(actor: distro);
 
             //PlayLegacyMessages2(actor: distro);
 
@@ -40,7 +40,7 @@ namespace AkkaNet_DomainBridging_Test
 
             //PlayLegacyMessages4(actor: distro);
 
-            PlayLegacyMessages5(actor: distro);
+            //PlayLegacyMessages5(actor: distro);
 
 
             //_myActor = ActorSystem.ActorOf<TranslatorActor>("Actor1");
