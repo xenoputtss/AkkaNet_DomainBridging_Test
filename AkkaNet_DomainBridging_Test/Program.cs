@@ -45,7 +45,11 @@ namespace AkkaNet_DomainBridging_Test
 
             //_myActor = ActorSystem.ActorOf<TranslatorActor>("Actor1");
             //PlayLegacyMessages1a(actor: distro);
-            Console.ReadKey();
+            while (true)
+            {
+                Console.ReadKey();
+                PlayLegacyMessages5(actor: distro);
+            }
         }
 
 
@@ -214,6 +218,8 @@ namespace AkkaNet_DomainBridging_Test
             //LastName2
             actor.Tell(userName2);
             actor.Tell(pin2);
+            //actor.Tell(userName2);
+            actor.Tell(new LegacyDomain.Events.PinAdded("1234", "TestUser2"));
             actor.Tell(firstName2);
             actor.Tell(lastName2);
 

@@ -35,6 +35,10 @@ namespace AkkaNet_DomainBridging_Test.Actors
             {
                 //Console.WriteLine(e.AggregateId +" "+ e.Pin);
                 CheckForAggregateConsistency(e);
+                if (e.Pin.Contains("broken"))
+                {
+                    throw new Exception("Everything's ruined! Pin checked");
+                }
                 Pin = e.Pin;
                 IsNowValidCheck();
             });

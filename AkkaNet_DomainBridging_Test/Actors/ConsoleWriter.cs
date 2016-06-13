@@ -19,11 +19,6 @@ namespace AkkaNet_DomainBridging_Test.Actors
 
                 output.WriteLine(msg.GetType().Name);
                 output.WriteLine(serializedObject);
-
-                if (isError)
-                {
-                    throw new Exception("Everything's ruined!");
-                }
             });
         }
     }
