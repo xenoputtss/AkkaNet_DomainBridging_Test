@@ -13,17 +13,9 @@ namespace AkkaNet_DomainBridging_Test.Actors
             {
                 System.Threading.Thread.Sleep(250);
                 var serializedObject = _tf.FormatObjects(new[] { msg });
+                Console.Out.WriteLine(msg.GetType().Name);
+                Console.Out.WriteLine(serializedObject);
 
-                var isError = serializedObject.Contains("broken");
-                var output = isError ? Console.Error : Console.Out;
-
-                output.WriteLine(msg.GetType().Name);
-                output.WriteLine(serializedObject);
-
-                if (isError)
-                {
-                    throw new Exception("Everything's ruined!");
-                }
             });
         }
     }

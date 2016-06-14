@@ -12,14 +12,9 @@ namespace AkkaNet_DomainBridging_Test.Actors
         #endregion
 
         private string AggregateId = null;  //Possbily the base of an "Aggregate Actor"
-
         private readonly IActorRef _destinationWriter;  //Translator needs to know where to write to
 
-        #region Some sort of Object State
-        private string UserName = null;
-        private string Pin = null;
-        private bool WeAreValid => UserName != null && Pin != null;
-        #endregion
+        private LegacyUserState state = new LegacyUserState();
 
         public TranslatorActor(string aggregateId)
         {
@@ -30,12 +25,22 @@ namespace AkkaNet_DomainBridging_Test.Actors
 
             SetupRecovery();
 
-            WaitingForMiniumumData();
+            Become(WaitingForMiniumumData);
         }
 
         private void SetupRecovery()
         {
-            //Recover<>
+            Recover<SnapshotOffer>(offer =>
+            {
+                var s = offer.Snapshot as LegacyUserState;
+                if (s == null)
+                    return;
+                state = s;
+                if (state.WeAreValid)
+                    Become(PostMinimumDataReceived);
+            });
+            Recover<LegacyDomain.Events.UserNameAdded>(e => Apply(a));
+            Recover<LegacyDomain.Events.PinAdded>(e => state.Pin = e.Pin);
         }
 
         /// <summary>
@@ -45,18 +50,31 @@ namespace AkkaNet_DomainBridging_Test.Actors
         {
             Command<LegacyDomain.Events.UserNameAdded>(e =>
             {
-                //Console.WriteLine(e.AggregateId + " " + e.UserName);
                 CheckForAggregateConsistency(e);
-                UserName = e.UserName;
-                MinimumDataNeededForDesitnationDomainCheck();
+                Persist(e, a =>
+                {
+                    Emit(a);
+                    Apply(a);
+                    state.UserName = a.UserName;
+                    MinimumDataNeededForDesitnationDomainCheck();
+                });
             });
             Command<LegacyDomain.Events.PinAdded>(e =>
             {
                 //Console.WriteLine(e.AggregateId +" "+ e.Pin);
                 CheckForAggregateConsistency(e);
-                Pin = e.Pin;
-                MinimumDataNeededForDesitnationDomainCheck();
+                if (e.Pin.Contains("broken"))
+                {
+                    throw new Exception("Everything's ruined!");
+                }
+
+                Persist(e, a =>
+                {
+                    state.Pin = a.Pin;
+                    MinimumDataNeededForDesitnationDomainCheck();
+                });
             });
+
             CommandAny(_ => Stash.Stash());
         }
 
@@ -79,6 +97,12 @@ namespace AkkaNet_DomainBridging_Test.Actors
                 var m = new ConsumerDomain.Commands.AddLastName(e.LastName, aggregateId: AggregateId);
                 _destinationWriter.Tell(m);
             });
+            Command<SaveSnapshotSuccess>(success =>
+            {
+                // soft-delete the journal up until the sequence # at
+                // which the snapshot was taken
+                DeleteMessages(success.Metadata.SequenceNr);
+            });
         }
 
         /// <summary>
@@ -92,18 +116,28 @@ namespace AkkaNet_DomainBridging_Test.Actors
                 throw new Exception($@"Aggregate Mismatched in {nameof(TranslatorActor)} with CurrentId='{AggregateId}' and Message AggregateId='{m.AggregateId}'");
         }
 
-        private void MinimumDataNeededForDesitnationDomainCheck()
+        public void MinimumDataNeededForDesitnationDomainCheck()
         {
-            if (WeAreValid)
+            if (state.WeAreValid)
             {
-                var create = new ConsumerDomain.Commands.CreateConsumer(userName: UserName, pin: Pin, aggregateId: AggregateId);
+                var create = new ConsumerDomain.Commands.CreateConsumer(userName: state.UserName, pin: state.Pin, aggregateId: AggregateId);
                 _destinationWriter.Tell(create);
+
                 Become(PostMinimumDataReceived);
                 Stash.UnstashAll();
+
+                SaveSnapshot(state);
             }
         }
 
 
+        private class LegacyUserState
+        {
+            public string UserName = null;
+            public string Pin = null;
+            public bool WeAreValid => UserName != null && Pin != null;
 
+
+        }
     }
 }

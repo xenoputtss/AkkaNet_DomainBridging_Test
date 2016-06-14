@@ -16,7 +16,7 @@ namespace AkkaNet_DomainBridging_Test
         {
             ActorSystem = ActorSystem.Create("DomainBridge");
 
-            var cw = ActorSystem.ActorOf(Props.Create(() => new ConsoleWriter()),"consoleWriter");
+            var cw = ActorSystem.ActorOf(Props.Create(() => new ConsoleWriter()), "consoleWriter");
             //var c = ActorSystem.ActorOf(Props.Create(() => new ConsumerActor(cw)));
 
             var distro = ActorSystem.ActorOf(Props.Create(() => new DistributionActor()));
@@ -32,7 +32,7 @@ namespace AkkaNet_DomainBridging_Test
             //    })), "MasterTranslatorRouter");
 
 
-            PlayLegacyMessages1(actor: distro);
+            //PlayLegacyMessages1(actor: distro);
 
             //PlayLegacyMessages2(actor: distro);
 
@@ -42,6 +42,7 @@ namespace AkkaNet_DomainBridging_Test
 
             //PlayLegacyMessages5(actor: distro);
 
+            PlayLegacyMessages6(actor: distro);
 
             //_myActor = ActorSystem.ActorOf<TranslatorActor>("Actor1");
             //PlayLegacyMessages1a(actor: distro);
@@ -234,6 +235,40 @@ namespace AkkaNet_DomainBridging_Test
             // Created user 3 (3 messages)
             // Created user 1 (3 messages)
             //*/
+        }
+
+        public static void PlayLegacyMessages6(IActorRef actor)
+        {
+            var userName1 = new LegacyDomain.Events.UserNameAdded("User1", "TestUser1");
+            var pin1 = new LegacyDomain.Events.PinAdded("abcd1", "TestUser1");
+            var firstName1 = new LegacyDomain.Events.FirstNameAdded("user1", "TestUser1");
+            var lastName1 = new LegacyDomain.Events.LastNameAdded("one", "TestUser1");
+
+            var userName2 = new LegacyDomain.Events.UserNameAdded("User2", "TestUser2");
+            var pin2 = new LegacyDomain.Events.PinAdded("abcd2", "TestUser2");
+            var firstName2 = new LegacyDomain.Events.FirstNameAdded("user2", "TestUser2");
+            var lastName2 = new LegacyDomain.Events.LastNameAdded("two", "TestUser2");
+
+            var userName3 = new LegacyDomain.Events.UserNameAdded("User3", "TestUser3");
+            var pin3 = new LegacyDomain.Events.PinAdded("abcd3", "TestUser3");
+            var firstName3 = new LegacyDomain.Events.FirstNameAdded("user3", "TestUser3");
+            var lastName3 = new LegacyDomain.Events.LastNameAdded("three", "TestUser3");
+
+
+            actor.Tell(userName1);
+            actor.Tell(pin1);
+            actor.Tell(lastName1);
+            actor.Tell(firstName1);
+
+            actor.Tell(userName2);
+            actor.Tell(pin2);
+            actor.Tell(firstName2);
+            actor.Tell(lastName2);
+
+            actor.Tell(userName3);
+            actor.Tell(pin3);
+            actor.Tell(firstName3);
+            actor.Tell(lastName3);
         }
     }
 
