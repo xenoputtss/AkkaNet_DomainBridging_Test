@@ -4,10 +4,9 @@ using Akka.Persistence;
 
 namespace AkkaNet_DomainBridging_Test.Actors
 {
-    public class TranslatorActor : ReceivePersistentActor, IWithUnboundedStash
+    public class TranslatorActor : ReceivePersistentActor
     {
         #region Base Class and Interface crap
-        public IStash Stash { get; set; }
         public override string PersistenceId => AggregateId;
         #endregion
 
@@ -39,7 +38,7 @@ namespace AkkaNet_DomainBridging_Test.Actors
                 if (state.WeAreValid)
                     Become(PostMinimumDataReceived);
             });
-            Recover<LegacyDomain.Events.UserNameAdded>(e => Apply(a));
+            Recover<LegacyDomain.Events.UserNameAdded>(e => state.UserName = e.UserName);
             Recover<LegacyDomain.Events.PinAdded>(e => state.Pin = e.Pin);
         }
 
@@ -53,8 +52,6 @@ namespace AkkaNet_DomainBridging_Test.Actors
                 CheckForAggregateConsistency(e);
                 Persist(e, a =>
                 {
-                    Emit(a);
-                    Apply(a);
                     state.UserName = a.UserName;
                     MinimumDataNeededForDesitnationDomainCheck();
                 });
